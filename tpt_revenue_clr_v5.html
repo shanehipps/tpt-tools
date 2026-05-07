@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TPT — Revenue × CLR Workshop Tool v4</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f4f1eb;
+    --surface: #fdfbf7;
+    --ink: #18160f;
+    --ink-2: #4a4738;
+    --ink-3: #807c6e;
+    --line: #d8d3c4;
+    --green: #3d7a1a;
+    --green-fill: rgba(61,122,26,0.26);
+    --yellow: #c97d10;
+    --yellow-fill: rgba(201,125,16,0.26);
+    --red: #c0392b;
+    --red-fill: rgba(192,57,43,0.26);
+    --gold: #c8b882;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: 'DM Sans', sans-serif; padding: 32px 28px; }
+  .container { max-width: 1020px; margin: 0 auto; }
+
+  .masthead { margin-bottom: 22px; }
+  h1 { font-family: 'Playfair Display', serif; font-weight: 500; font-size: 30px; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .subtitle { font-size: 12px; color: var(--ink-3); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.8px; }
+
+  .top-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .stat { background: var(--surface); border: 0.5px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .stat-label { font-size: 11px; color: var(--ink-3); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+  .stat-val { font-size: 28px; font-weight: 500; line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--ink-3); margin-top: 5px; }
+
+  .sensitivity-box { background: var(--ink); color: #f4f1eb; border-radius: 10px; padding: 14px 18px; margin-bottom: 14px; }
+  .sens-ratio { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .sens-dynamic { font-size: 12px; color: var(--gold); margin-bottom: 6px; font-family: 'DM Mono', monospace; }
+  .sens-philosophy { font-size: 13px; font-style: italic; color: #c8c4b2; border-top: 0.5px solid rgba(255,255,255,0.12); padding-top: 8px; margin-top: 4px; }
+
+  .card { background: var(--surface); border: 0.5px solid var(--line); border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  .card-title { font-size: 11px; font-weight: 500; margin-bottom: 14px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.6px; font-family: 'DM Mono', monospace; }
+
+  .slider-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .slider-row:last-child { margin-bottom: 0; }
+  .slider-row label { font-size: 13px; color: var(--ink-2); min-width: 140px; }
+  .slider-row input[type="range"] { flex: 1; accent-color: var(--gold); cursor: pointer; }
+  .slider-val { font-size: 13px; font-weight: 500; min-width: 68px; text-align: right; font-family: 'DM Mono', monospace; }
+  .slider-hint { font-size: 11px; color: var(--ink-3); margin: -6px 0 10px 154px; }
+
+  .controls-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .toggle-group { display: inline-flex; background: var(--bg); border-radius: 8px; padding: 3px; border: 0.5px solid var(--line); }
+  .toggle-btn { padding: 6px 14px; border: none; background: transparent; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; border-radius: 6px; color: var(--ink-2); transition: all 0.15s; }
+  .toggle-btn.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 500; }
+  .check-label { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink-2); cursor: pointer; user-select: none; }
+  .check-label input { accent-color: var(--gold); cursor: pointer; width: 14px; height: 14px; }
+  .divider-v { width: 1px; height: 20px; background: var(--line); }
+
+  .chart-wrap { background: var(--surface); border: 0.5px solid var(--line); border-radius: 10px; padding: 20px; margin-bottom: 14px; }
+  .chart-inner { position: relative; width: 100%; height: 430px; }
+  #zone-chart { width: 100% !important; height: 100% !important; }
+
+  .chart-legend { display: flex; gap: 16px; font-size: 11px; color: var(--ink-3); margin-top: 10px; justify-content: center; flex-wrap: wrap; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-swatch { width: 11px; height: 11px; border-radius: 2px; }
+  .legend-divider { color: var(--line); }
+  .layer-note { font-size: 11px; color: var(--ink-3); font-style: italic; margin-top: 6px; text-align: center; }
+
+  .pnl-table { width: 100%; font-size: 13px; border-collapse: collapse; }
+  .pnl-table td { padding: 7px 0; }
+  .pnl-table td:first-child { color: var(--ink-2); }
+  .pnl-table td:last-child { text-align: right; font-weight: 500; font-family: 'DM Mono', monospace; }
+  .pnl-divider td { border-top: 0.5px dashed var(--line); padding-top: 9px; }
+  .pnl-total td { border-top: 0.5px solid var(--ink-3); padding-top: 9px; font-size: 14px; }
+  .pnl-sub td:first-child { font-style: italic; color: var(--ink-3); padding-left: 0; }
+
+  details { background: var(--bg); border: 0.5px solid var(--line); border-radius: 8px; padding: 12px 16px; margin-top: 4px; }
+  summary { cursor: pointer; font-size: 13px; font-weight: 500; color: var(--ink-2); user-select: none; }
+  details[open] { padding-bottom: 16px; }
+  details .slider-row { margin-top: 12px; }
+
+
+
+  .hidden-drag {
+    background: var(--surface);
+    border: 0.5px solid var(--line);
+    border-top: 2px solid var(--ink-3);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-top: 14px;
+  }
+  .hd-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+  .hd-text {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.6;
+  }
+  .hd-inputs {
+    display: grid;
+    grid-template-columns: 1fr 110px;
+    gap: 8px 14px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 0.5px dashed var(--line);
+    align-items: center;
+  }
+  .hd-input-label {
+    font-size: 12px;
+    color: var(--ink-2);
+  }
+  .hd-input-label .est-flag {
+    font-size: 10px;
+    color: var(--ink-3);
+    font-style: italic;
+    margin-left: 4px;
+  }
+  .hd-input {
+    background: var(--bg);
+    border: 0.5px solid var(--line);
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    text-align: right;
+    width: 100%;
+  }
+  .hd-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: var(--surface);
+  }
+  .hd-total-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    padding-top: 8px;
+    border-top: 0.5px solid var(--ink-3);
+    margin-top: 4px;
+  }
+  .hd-total-val {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    text-align: right;
+    padding-top: 8px;
+    border-top: 0.5px solid var(--ink-3);
+    margin-top: 4px;
+  }
+  .hd-footnote {
+    font-size: 11px;
+    color: var(--ink-3);
+    font-style: italic;
+    margin-top: 8px;
+  }
+  .trail-note { font-size: 11px; color: var(--ink-3); font-style: italic; margin-top: 6px; text-align: center; display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="masthead">
+    <h1>TPT — Revenue × CLR</h1>
+    <div class="subtitle">Two levers · Three zones · One scoreboard</div>
+  </div>
+
+
+
+  <div class="top-grid">
+    <div class="stat">
+      <div class="stat-label">Revenue</div>
+      <div class="stat-val" id="rev-stat">—</div>
+      <div class="stat-sub" id="rev-sub">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">EBITDA</div>
+      <div class="stat-val" id="ebitda-stat">—</div>
+      <div class="stat-sub" id="ebitda-sub">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Zone</div>
+      <div class="stat-val" id="zone-stat">—</div>
+      <div class="stat-sub" id="zone-sub">—</div>
+    </div>
+  </div>
+
+  <div class="sensitivity-box">
+    <div class="sens-ratio" id="sens-ratio">—</div>
+    <div class="sens-dynamic" id="sens-dynamic">—</div>
+    <div class="sens-philosophy" id="sens-philosophy">CLR is oxygen. Revenue is how fast you run.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Levers</div>
+    <div class="slider-row">
+      <label>Monthly Revenue</label>
+      <input type="range" id="rev" min="30" max="150" value="90" step="1" />
+      <span class="slider-val" id="rev-out">$90M</span>
+    </div>
+    <div class="slider-row">
+      <label>CLR %</label>
+      <input type="range" id="clr" min="30" max="100" value="65" step="1" />
+      <span class="slider-val" id="clr-out">65%</span>
+    </div>
+    <div class="slider-hint">Structural floor ~55–58% · 2025 actual ~67% · Current ~80% · Theoretical best ~30%</div>
+  </div>
+
+  <div class="controls-bar">
+    <div class="toggle-group">
+      <button class="toggle-btn active" data-period="month">Monthly</button>
+      <button class="toggle-btn" data-period="quarter">Quarterly</button>
+      <button class="toggle-btn" data-period="year">Annual</button>
+    </div>
+    <div class="divider-v"></div>
+    <label class="check-label">
+      <input type="checkbox" id="trail-toggle" />
+      6-month trail
+    </label>
+    <label class="check-label">
+      <input type="checkbox" id="strategy-toggle" checked />
+      Strategic overlay
+    </label>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-inner">
+      <canvas id="zone-chart"></canvas>
+    </div>
+    <div class="chart-legend">
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--green-fill);border:1px solid var(--green);"></span>EBITDA positive</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--yellow-fill);border:1px solid var(--yellow);"></span>Profitable but below target</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--red-fill);border:1px solid var(--red);"></span>Cash burn</div>
+      <span class="legend-divider">·</span>
+      <div class="legend-item"><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#18160f;"></span>Current point</div>
+      <span class="legend-divider">·</span>
+      <span style="font-style:italic;" id="layer-note-inline">Color = financial outcome · Quadrant = strategic position</span>
+    </div>
+    <div class="trail-note" id="trail-note">Trail is illustrative placeholder — swap in real monthly figures from Stefan.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">P&L Breakdown — at this operating point</div>
+    <table class="pnl-table"><tbody id="pnl-tbody"></tbody></table>
+  </div>
+
+  <details>
+    <summary>Assumptions — adjust to stress test</summary>
+    <div class="slider-row">
+      <label>Scaling Costs %</label>
+      <input type="range" id="varcost" min="5" max="20" value="12" step="1" />
+      <span class="slider-val" id="varcost-out">12%</span>
+    </div>
+    <div class="slider-hint" style="margin-left:154px;">% of revenue. Stefan model implies ~12%.</div>
+    <div class="slider-row">
+      <label>Fixed Costs / mo</label>
+      <input type="range" id="fixed" min="2" max="10" value="5.55" step="0.05" />
+      <span class="slider-val" id="fixed-out">$5.55M</span>
+    </div>
+    <div class="slider-hint" style="margin-left:154px;">True fixed opex + Marketing held at plan.</div>
+    <div class="slider-row">
+      <label>Green threshold</label>
+      <input type="range" id="green-thresh" min="5" max="35" value="12" step="0.5" />
+      <span class="slider-val" id="green-thresh-out">$12M/mo</span>
+    </div>
+    <div class="slider-hint" style="margin-left:154px;">$12M/mo = $144M/yr ≈ 2025 actual.</div>
+  </details>
+
+
+  <div class="hidden-drag">
+    <div class="hd-label">Hidden Drag</div>
+    <div class="hd-text">Every month the polarity stays out of balance, TPT pays twice — Trader Costs eating revenue AND Risk Department (91% over budget) eating EBITDA. The longer enforcement is delayed, the more both compound. This cost is invisible on the chart but runs in parallel with every data point on it.</div>
+    <div class="hd-inputs">
+      <div class="hd-input-label">Risk Department overspend</div>
+      <input type="number" class="hd-input" id="hd-risk" value="2.5" step="0.1" min="0" />
+      <div class="hd-input-label">Ban wave execution<span class="est-flag">est.</span></div>
+      <input type="number" class="hd-input" id="hd-ban" value="0.5" step="0.1" min="0" />
+      <div class="hd-input-label">PR blowback<span class="est-flag">est.</span></div>
+      <input type="number" class="hd-input" id="hd-pr" value="0.3" step="0.1" min="0" />
+      <div class="hd-total-label">Total one-time correction cost</div>
+      <div class="hd-total-val" id="hd-total">$3.3M</div>
+    </div>
+    <div class="hd-footnote">Structural drag (Trader Costs, Risk Dept run-rate) is already in the formula above. These are one-time costs to correct course.</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+(function () {
+  // ── state ──
+  var period = 'month';
+  var showTrail = false;
+  var showStrategy = true;
+
+  var mult = { month: 1, quarter: 3, year: 12 };
+  var periodLabel = { month: 'per month', quarter: 'per quarter', year: 'per year' };
+
+  // crosshair anchors (fixed strategic reference)
+  var X_MID = 90;   // $90M revenue
+  var Y_MID = 65;   // 65% CLR (2025 actual)
+
+  // illustrative trail, most recent first
+  var trail = [
+    { rev: 77,  clr: 80, label: 'Apr 26' },
+    { rev: 82,  clr: 81, label: 'Mar 26' },
+    { rev: 86,  clr: 83, label: 'Feb 26' },
+    { rev: 90,  clr: 78, label: 'Jan 26' },
+    { rev: 88,  clr: 70, label: 'Dec 25' },
+    { rev: 85,  clr: 68, label: 'Nov 25' }
+  ];
+
+  // quadrant definitions (strategic)
+  var QUADRANTS = [
+    { label: 'PRINT MODE',    descx: 'right', descy: 'bottom', rx: 92, ry: 36  },
+    { label: 'FAIR TRADE',    descx: 'left',  descy: 'bottom', rx: 32, ry: 36  },
+    { label: 'SUGAR HIGH',    descx: 'right', descy: 'top',    rx: 92, ry: 97  },
+    { label: 'BLEEDING OUT',  descx: 'left',  descy: 'top',    rx: 32, ry: 97  }
+  ];
+
+  var GREEN = '#3d7a1a', YELLOW = '#c97d10', RED = '#c0392b';
+  var GF = 'rgba(61,140,26,0.52)', YF = 'rgba(210,130,16,0.50)', RF = 'rgba(200,50,40,0.48)';
+
+  function fmt(n) { return (n >= 0 ? '$' : '-$') + Math.abs(n).toFixed(1) + 'M'; }
+
+  function ebitda(rev, clr, vp, fx) {
+    return rev * (1 - clr / 100 - vp / 100) - fx;
+  }
+
+  function zone(e, thr) {
+    return e < 0 ? 'red' : e < thr ? 'yellow' : 'green';
+  }
+
+  function zoneColor(z) { return z === 'green' ? GREEN : z === 'yellow' ? YELLOW : RED; }
+
+  function quadrantName(rev, clr) {
+    if (clr > Y_MID && rev > X_MID) return 'Sugar High';
+    if (clr > Y_MID && rev <= X_MID) return 'Bleeding Out';
+    if (clr <= Y_MID && rev > X_MID) return 'Print Mode';
+    return 'Fair Trade';
+  }
+
+  var quadDesc = {
+    'Print Mode':    'Low CLR · High Revenue · Compounding',
+    'Fair Trade':    'Low CLR · Moderate Revenue · Profitable — watch reputation clock',
+    'Sugar High':    'High CLR · Revenue masking the leak',
+    'Bleeding Out':  'High CLR · Low Revenue · Cash burn'
+  };
+
+  function buildZonePts(vp, fx, thr) {
+    var g = [], y = [], r = [];
+    for (var rv = 30; rv <= 150; rv += 2) {
+      for (var cl = 30; cl <= 100; cl += 2) {
+        var e = ebitda(rv, cl, vp, fx);
+        var z = zone(e, thr);
+        var pt = { x: rv, y: cl };
+        if (z === 'green') g.push(pt); else if (z === 'yellow') y.push(pt); else r.push(pt);
+      }
+    }
+    return { g: g, y: y, r: r };
+  }
+
+  // ── strategy overlay plugin ──
+  var strategyPlugin = {
+    id: 'strategyOverlay',
+    afterDraw: function (chart) {
+      if (!showStrategy) return;
+      var ctx = chart.ctx;
+      var xs = chart.scales.x;
+      var ys = chart.scales.y;
+      var px = xs.getPixelForValue(X_MID);
+      var py = ys.getPixelForValue(Y_MID);
+      var left = xs.left, right = xs.right, top = ys.top, bottom = ys.bottom;
+
+      ctx.save();
+
+      // hatch fill per quadrant
+
+
+      // crosshair lines
+      ctx.setLineDash([]);
+      ctx.strokeStyle = 'rgba(24,22,15,0.55)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(px, top);    ctx.lineTo(px, bottom); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(left, py);   ctx.lineTo(right, py);  ctx.stroke();
+      ctx.setLineDash([]);
+
+      // quadrant labels
+      var labels = [
+        { text: 'SUGAR HIGH',   x: right - 10, y: top + 16,      align: 'right' },
+        { text: 'BLEEDING OUT', x: left + 10,  y: top + 16,      align: 'left'  },
+        { text: 'PRINT MODE',   x: right - 10, y: bottom - 10,   align: 'right' },
+        { text: 'FAIR TRADE',   x: left + 10,  y: bottom - 10,   align: 'left'  }
+      ];
+
+      ctx.font = "700 18px 'DM Mono', monospace";
+      ctx.letterSpacing = '0.8px';
+      labels.forEach(function (lb) {
+        ctx.textAlign = lb.align;
+        ctx.fillStyle = 'rgba(24,22,15,0.72)';
+        ctx.fillText(lb.text, lb.x, lb.y);
+      });
+
+      ctx.restore();
+    }
+  };
+
+  var chart = null;
+
+  function update() {
+    var rev     = parseFloat(document.getElementById('rev').value);
+    var clr     = parseFloat(document.getElementById('clr').value);
+    var vp      = parseFloat(document.getElementById('varcost').value);
+    var fx      = parseFloat(document.getElementById('fixed').value);
+    var thr     = parseFloat(document.getElementById('green-thresh').value);
+    var m       = mult[period];
+
+    // label outputs
+    document.getElementById('rev-out').textContent         = '$' + rev + 'M';
+    document.getElementById('clr-out').textContent         = clr + '%';
+    document.getElementById('varcost-out').textContent     = vp + '%';
+    document.getElementById('fixed-out').textContent       = '$' + fx.toFixed(2) + 'M';
+    document.getElementById('green-thresh-out').textContent = '$' + thr.toFixed(1) + 'M/mo';
+
+    var wd  = rev * clr / 100;
+    var sc  = rev * vp  / 100;
+    var tm  = rev - wd;
+    var eb  = tm - sc - fx;
+    var z   = zone(eb, thr);
+    var zc  = zoneColor(z);
+    var qn  = quadrantName(rev, clr);
+
+    // stat panel
+    document.getElementById('rev-stat').textContent  = '$' + (rev * m).toFixed(0) + 'M';
+    document.getElementById('rev-sub').textContent   = periodLabel[period];
+
+    var ebEl = document.getElementById('ebitda-stat');
+    ebEl.textContent  = fmt(eb * m);
+    ebEl.style.color  = zc;
+    document.getElementById('ebitda-sub').textContent = periodLabel[period] + ' · $' + (eb * 12).toFixed(0) + 'M annual run-rate';
+
+    var znEl = document.getElementById('zone-stat');
+    znEl.textContent  = qn;
+    znEl.style.color  = zc;
+    document.getElementById('zone-sub').textContent  = quadDesc[qn] || '';
+
+    // sensitivity
+    // clrImpact = $M of EBITDA from a 1pp CLR drop at this revenue
+    // revImpact = $M of EBITDA from adding $1M of revenue at this CLR + variable cost
+    // When CLR + variable cost >= 100%, every additional $1M of revenue loses money,
+    // so the "revenue equivalent" of a CLR drop is undefined.
+    var clrImpact = rev * 0.01;
+    var revImpact = (1 - clr / 100 - vp / 100);
+    var degenerate = revImpact <= 0;
+
+    var ratioStr, dynamicStr, philosophy;
+
+    if (degenerate) {
+      ratioStr   = 'Revenue is upside-down here — every $1M of revenue loses money.';
+      dynamicStr = 'CLR + variable cost ≥ 100%. Revenue can\u2019t buy you out of this. Cut CLR first.';
+      philosophy = 'Only CLR matters at this point. Revenue is a trap until CLR drops.';
+    } else {
+      var ratioNum = clrImpact / revImpact;
+      var ratioFixed = ratioNum.toFixed(1);
+      ratioStr   = 'CLR moves ' + ratioFixed + 'x harder than revenue.';
+      dynamicStr = 'Every 1pp CLR drop = ' + fmt(clrImpact) +
+                   ' EBITDA \u2014 same as adding $' + ratioFixed + 'M in revenue.';
+      if (ratioNum >= 4) {
+        philosophy = 'CLR is oxygen. Revenue is how fast you run.';
+      } else if (ratioNum >= 2) {
+        philosophy = 'CLR still leads \u2014 but revenue is closing the gap.';
+      } else {
+        philosophy = 'CLR leads less powerfully here. Both levers matter \u2014 CLR still first.';
+      }
+    }
+
+    document.getElementById('sens-ratio').textContent     = ratioStr;
+    document.getElementById('sens-dynamic').textContent   = dynamicStr;
+    document.getElementById('sens-philosophy').textContent = philosophy;
+
+    // P&L
+    var rows = [
+      { label: 'Total Revenue', val: rev, cls: '' },
+      { label: 'Trader Costs [Pro Withdrawals, Pro+ Withdrawals]', val: -wd, cls: 'pnl-divider' },
+      { label: 'Trading Margin', val: tm, cls: 'pnl-sub pnl-divider' },
+      { label: 'Scaling Costs [Plaid, Ninja Trader, etc.]', val: -sc, cls: 'pnl-divider' },
+      { label: 'Fixed Costs [Compensation, G&A, etc.]', val: -fx, cls: '' },
+      { label: 'Monthly EBITDA', val: eb, cls: 'pnl-total', color: zc }
+    ];
+    var tbody = document.getElementById('pnl-tbody');
+    tbody.innerHTML = '';
+    rows.forEach(function (r) {
+      var tr = document.createElement('tr');
+      if (r.cls) tr.className = r.cls;
+      var vc = r.color ? ' style="color:' + r.color + ';"' : '';
+      tr.innerHTML = '<td>' + r.label + '</td><td' + vc + '>' + fmt(r.val * m) + '</td>';
+      tbody.appendChild(tr);
+    });
+
+    // chart data
+    var zonePts    = buildZonePts(vp, fx, thr);
+    var trailData  = showTrail ? trail.map(function (t) { return { x: t.rev, y: t.clr }; }) : [];
+    var trailAlpha = trail.map(function (t, i) { return 'rgba(24,22,15,' + (1 - i * 0.14).toFixed(2) + ')'; });
+
+    document.getElementById('trail-note').style.display = showTrail ? 'block' : 'none';
+    document.getElementById('layer-note-inline').style.display = showStrategy ? 'inline' : 'none';
+
+    if (chart) {
+      chart.data.datasets[0].data = zonePts.g;
+      chart.data.datasets[1].data = zonePts.y;
+      chart.data.datasets[2].data = zonePts.r;
+      chart.data.datasets[3].data = [{ x: rev, y: clr }];
+      chart.data.datasets[4].data = trailData;
+      chart.data.datasets[4].pointBackgroundColor = trailAlpha;
+      chart.update('none');
+    } else {
+      var ctx2 = document.getElementById('zone-chart').getContext('2d');
+      chart = new Chart(ctx2, {
+        type: 'scatter',
+        plugins: [strategyPlugin],
+        data: {
+          datasets: [
+            { label: 'Green',   data: zonePts.g,         backgroundColor: GF,          pointRadius: 4 },
+            { label: 'Yellow',  data: zonePts.y,         backgroundColor: YF,          pointRadius: 4 },
+            { label: 'Red',     data: zonePts.r,         backgroundColor: RF,          pointRadius: 4 },
+            {
+              label: 'Current', data: [{ x: rev, y: clr }],
+              backgroundColor: '#18160f', pointRadius: 12,
+              pointStyle: 'crossRot', borderWidth: 3, borderColor: '#18160f', order: 0
+            },
+            {
+              label: 'Trail',   data: trailData,
+              pointBackgroundColor: trailAlpha,
+              pointBorderColor: 'rgba(24,22,15,0.3)', pointBorderWidth: 1,
+              pointRadius: 9, showLine: true,
+              borderColor: 'rgba(24,22,15,0.65)', borderWidth: 4,
+              fill: false, order: 1,
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) {
+                    var t = trail[ctx.dataIndex];
+                    return t ? t.label + ': $' + t.rev + 'M / CLR ' + t.clr + '%' : '';
+                  }
+                }
+              }
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              filter: function (item) { return item.dataset.label === 'Trail' || item.dataset.label === 'Current'; },
+              callbacks: {
+                title: function () { return ''; },
+                label: function (ctx) {
+                  if (ctx.dataset.label === 'Trail') {
+                    var t = trail[ctx.dataIndex];
+                    return t ? t.label + ': $' + t.rev + 'M rev / CLR ' + t.clr + '%' : '';
+                  }
+                  return 'Current: $' + ctx.parsed.x + 'M rev / CLR ' + ctx.parsed.y + '%';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'linear', min: 30, max: 150,
+              title: { display: true, text: 'Monthly Revenue ($M)', font: { size: 12, family: "'DM Sans'" }, color: '#4a4738' },
+              ticks: { stepSize: 10, font: { size: 11, family: "'DM Mono'" }, color: '#807c6e' },
+              grid: { color: 'rgba(0,0,0,0.04)' }, border: { color: 'rgba(0,0,0,0.08)' }
+            },
+            y: {
+              type: 'linear', min: 30, max: 100,
+              title: { display: true, text: 'CLR %', font: { size: 12, family: "'DM Sans'" }, color: '#4a4738' },
+              ticks: { stepSize: 10, font: { size: 11, family: "'DM Mono'" }, color: '#807c6e' },
+              grid: { color: 'rgba(0,0,0,0.04)' }, border: { color: 'rgba(0,0,0,0.08)' }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // ── event wiring ──
+  ['rev','clr','varcost','fixed','green-thresh'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', update);
+  });
+
+  document.querySelectorAll('.toggle-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      period = btn.dataset.period;
+      document.querySelectorAll('.toggle-btn').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      update();
+    });
+  });
+
+  document.getElementById('trail-toggle').addEventListener('change', function () {
+    showTrail = this.checked; update();
+  });
+
+  document.getElementById('strategy-toggle').addEventListener('change', function () {
+    showStrategy = this.checked;
+    if (chart) chart.draw(); // redraw with plugin
+    document.getElementById('layer-note-inline').style.display = showStrategy ? 'inline' : 'none';
+  });
+
+  // ── Hidden Drag total ──
+  function updateHiddenDrag() {
+    var risk = parseFloat(document.getElementById('hd-risk').value) || 0;
+    var ban  = parseFloat(document.getElementById('hd-ban').value)  || 0;
+    var pr   = parseFloat(document.getElementById('hd-pr').value)   || 0;
+    var total = risk + ban + pr;
+    document.getElementById('hd-total').textContent = '$' + total.toFixed(1) + 'M';
+  }
+  ['hd-risk','hd-ban','hd-pr'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', updateHiddenDrag);
+  });
+  updateHiddenDrag();
+
+  update();
+})();
+</script>
+</body>
+</html>
