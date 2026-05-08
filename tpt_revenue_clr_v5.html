@@ -212,7 +212,7 @@
       <input type="range" id="clr" min="30" max="100" value="65" step="1" />
       <span class="slider-val" id="clr-out">65%</span>
     </div>
-    <div class="slider-hint">Structural floor ~55–58% · 2025 actual ~67% · Current ~80% · Theoretical best ~30%</div>
+    <div class="slider-hint">Structural floor ~55–58% · 2025 actual ~67% · Current ~80% · Danger threshold 75% · Theoretical best ~30%</div>
   </div>
 
   <div class="controls-bar">
@@ -305,8 +305,8 @@
   var periodLabel = { month: 'per month', quarter: 'per quarter', year: 'per year' };
 
   // crosshair anchors (fixed strategic reference)
-  var X_MID = 90;   // $90M revenue
-  var Y_MID = 65;   // 65% CLR (2025 actual)
+  var X_MID = 70;   // $70M revenue — operational floor
+  var Y_MID = 75;   // 75% CLR — structural danger threshold
 
   // illustrative trail, most recent first
   var trail = [
@@ -349,10 +349,10 @@
   }
 
   var quadDesc = {
-    'Print Mode':    'Low CLR · High Revenue · Compounding',
-    'Fair Trade':    'Low CLR · Moderate Revenue · Profitable — watch reputation clock',
-    'Sugar High':    'High CLR · Revenue masking the leak',
-    'Bleeding Out':  'High CLR · Low Revenue · Cash burn'
+    'Print Mode':    'Low CLR · Strong Revenue · Both levers working — compound from here',
+    'Fair Trade':    'Low CLR · Revenue below floor · Structure is right — volume is the missing piece',
+    'Sugar High':    'High CLR · Revenue masking a structural leak — the number looks okay but the bleed is real',
+    'Bleeding Out':  'High CLR · Low Revenue · Both levers wrong — genuinely at risk'
   };
 
   function buildZonePts(vp, fx, thr) {
