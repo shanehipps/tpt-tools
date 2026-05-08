@@ -327,7 +327,7 @@
   ];
 
   var GREEN = '#3d7a1a', YELLOW = '#c97d10', RED = '#c0392b';
-  var GF = 'rgba(61,140,26,0.52)', YF = 'rgba(210,130,16,0.50)', RF = 'rgba(200,50,40,0.48)';
+  var GF = 'rgba(110,175,95,0.55)', YF = 'rgba(205,155,85,0.55)', RF = 'rgba(205,105,95,0.55)';
 
   function fmt(n) { return (n >= 0 ? '$' : '-$') + Math.abs(n).toFixed(1) + 'M'; }
 
@@ -357,8 +357,8 @@
 
   function buildZonePts(vp, fx, thr) {
     var g = [], y = [], r = [];
-    for (var rv = 30; rv <= 150; rv += 2) {
-      for (var cl = 30; cl <= 100; cl += 2) {
+    for (var rv = 30; rv <= 150; rv += 1.5) {
+      for (var cl = 30; cl <= 100; cl += 1.5) {
         var e = ebitda(rv, cl, vp, fx);
         var z = zone(e, thr);
         var pt = { x: rv, y: cl };
@@ -393,19 +393,41 @@
       ctx.beginPath(); ctx.moveTo(left, py);   ctx.lineTo(right, py);  ctx.stroke();
       ctx.setLineDash([]);
 
-      // quadrant labels
+      // quadrant labels with pill backgrounds
       var labels = [
-        { text: 'SUGAR HIGH',   x: right - 10, y: top + 16,      align: 'right' },
-        { text: 'BLEEDING OUT', x: left + 10,  y: top + 16,      align: 'left'  },
-        { text: 'PRINT MODE',   x: right - 10, y: bottom - 10,   align: 'right' },
-        { text: 'FAIR TRADE',   x: left + 10,  y: bottom - 10,   align: 'left'  }
+        { text: 'SUGAR HIGH',   x: right - 14, y: top + 20,      align: 'right' },
+        { text: 'BLEEDING OUT', x: left + 14,  y: top + 20,      align: 'left'  },
+        { text: 'PRINT MODE',   x: right - 14, y: bottom - 14,   align: 'right' },
+        { text: 'FAIR TRADE',   x: left + 14,  y: bottom - 14,   align: 'left'  }
       ];
 
-      ctx.font = "700 18px 'DM Mono', monospace";
+      ctx.font = "700 13px 'DM Mono', monospace";
       ctx.letterSpacing = '0.8px';
+      var pad = { x: 8, y: 5 };
       labels.forEach(function (lb) {
         ctx.textAlign = lb.align;
+        var tw = ctx.measureText(lb.text).width;
+        var bx = lb.align === 'right' ? lb.x - tw - pad.x : lb.x - pad.x;
+        var by = lb.y - 13 - pad.y;
+        var bw = tw + pad.x * 2;
+        var bh = 13 + pad.y * 2;
+        var r = 4;
+        // pill background
         ctx.fillStyle = 'rgba(24,22,15,0.72)';
+        ctx.beginPath();
+        ctx.moveTo(bx + r, by);
+        ctx.lineTo(bx + bw - r, by);
+        ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + r);
+        ctx.lineTo(bx + bw, by + bh - r);
+        ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - r, by + bh);
+        ctx.lineTo(bx + r, by + bh);
+        ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - r);
+        ctx.lineTo(bx, by + r);
+        ctx.quadraticCurveTo(bx, by, bx + r, by);
+        ctx.closePath();
+        ctx.fill();
+        // label text
+        ctx.fillStyle = 'rgba(255,251,247,0.95)';
         ctx.fillText(lb.text, lb.x, lb.y);
       });
 
@@ -528,20 +550,20 @@
         plugins: [strategyPlugin],
         data: {
           datasets: [
-            { label: 'Green',   data: zonePts.g,         backgroundColor: GF,          pointRadius: 4 },
-            { label: 'Yellow',  data: zonePts.y,         backgroundColor: YF,          pointRadius: 4 },
-            { label: 'Red',     data: zonePts.r,         backgroundColor: RF,          pointRadius: 4 },
+            { label: 'Green',   data: zonePts.g,         backgroundColor: GF,          pointRadius: 6, order: 10 },
+            { label: 'Yellow',  data: zonePts.y,         backgroundColor: YF,          pointRadius: 6, order: 10 },
+            { label: 'Red',     data: zonePts.r,         backgroundColor: RF,          pointRadius: 6, order: 10 },
             {
               label: 'Current', data: [{ x: rev, y: clr }],
-              backgroundColor: '#18160f', pointRadius: 12,
-              pointStyle: 'crossRot', borderWidth: 3, borderColor: '#18160f', order: 0
+              backgroundColor: '#18160f', pointRadius: 14,
+              pointStyle: 'crossRot', borderWidth: 4, borderColor: '#18160f', order: 0
             },
             {
               label: 'Trail',   data: trailData,
               pointBackgroundColor: trailAlpha,
-              pointBorderColor: 'rgba(24,22,15,0.3)', pointBorderWidth: 1,
-              pointRadius: 9, showLine: true,
-              borderColor: 'rgba(24,22,15,0.65)', borderWidth: 4,
+              pointBorderColor: 'rgba(255,251,247,0.9)', pointBorderWidth: 2,
+              pointRadius: 8, showLine: true,
+              borderColor: 'rgba(24,22,15,0.9)', borderWidth: 3.5,
               fill: false, order: 1,
               tooltip: {
                 callbacks: {
